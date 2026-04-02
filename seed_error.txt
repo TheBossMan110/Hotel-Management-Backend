@@ -1,0 +1,6 @@
+❌ Seed error: MaintenanceRequest validation failed: ticketNumber: Path `ticketNumber` is required.
+Stack: ValidationError: MaintenanceRequest validation failed: ticketNumber: Path `ticketNumber` is required.
+    at Document.invalidate (c:\Users\AWCD\Desktop\E-Project\hotel\hotel-management\backend code\backend code\node_modules\mongoose\lib\document.js:3381:32)
+    at c:\Users\AWCD\Desktop\E-Project\hotel\hotel-management\backend code\backend code\node_modules\mongoose\lib\document.js:3142:17
+    at c:\Users\AWCD\Desktop\E-Project\hotel\hotel-management\backend code\backend code\node_modules\mongoose\lib\schemaType.js:1446:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
