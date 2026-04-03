@@ -7,19 +7,19 @@ export const authenticate = async (req, res, next) => {
   try {
     // Get token from header or cookie
     let token = req.headers.authorization?.split(' ')[1] || req.cookies.accessToken;
-    
+
     if (!token) {
       return res.status(401).json({ message: 'Access denied. No token provided.' });
     }
 
     try {
       const decoded = jwt.verify(token, config.jwt.accessSecret);
-      
+
       const user = await User.findById(decoded.userId);
       if (!user) {
         return res.status(401).json({ message: 'User not found.' });
       }
-      
+
       if (!user.isActive) {
         return res.status(401).json({ message: 'Account is deactivated.' });
       }
@@ -47,8 +47,8 @@ export const authorize = (...allowedRoles) => {
     }
 
     if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({ 
-        message: 'Access denied. Insufficient permissions.' 
+      return res.status(403).json({
+        message: 'Access denied. Insufficient permissions.'
       });
     }
 
@@ -60,7 +60,7 @@ export const authorize = (...allowedRoles) => {
 export const optionalAuth = async (req, res, next) => {
   try {
     let token = req.headers.authorization?.split(' ')[1] || req.cookies.accessToken;
-    
+
     if (token) {
       try {
         const decoded = jwt.verify(token, config.jwt.accessSecret);
@@ -73,7 +73,7 @@ export const optionalAuth = async (req, res, next) => {
         // Token invalid or expired, continue without user
       }
     }
-    
+
     next();
   } catch (error) {
     next();
@@ -109,7 +109,7 @@ export const verifyRefreshToken = (token) => {
 // Set auth cookies
 export const setAuthCookies = (res, accessToken, refreshToken) => {
   const isProduction = config.server.env === 'production';
-  
+
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
     secure: isProduction,

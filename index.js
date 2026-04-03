@@ -30,6 +30,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust the reverse proxy (required for Render/Heroku to work with express-rate-limit)
+app.set('trust proxy', 1);
+
 // ── HTTP Server + Socket.io ──
 const httpServer = createServer(app);
 const io = new SocketIO(httpServer, {
