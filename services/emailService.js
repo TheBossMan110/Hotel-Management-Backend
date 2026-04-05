@@ -1,9 +1,27 @@
 import { Resend } from 'resend';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-const HOTEL_NAME = 'Grand Azure Pakistan';
+const HOTEL_NAME = 'LuxuryStay Hospitality';
+
+// Resolve and encode frontend logo as Base64 for direct inline rendering
+const LOGO_PATH = path.resolve(__dirname, '../../frontend code/public/logo.png');
+let logoSrc = 'https://luxurystay-hospitality.vercel.app/logo.png'; // fallback
+try {
+  if (fs.existsSync(LOGO_PATH)) {
+    const logoData = fs.readFileSync(LOGO_PATH);
+    logoSrc = `data:image/png;base64,${logoData.toString('base64')}`;
+  }
+} catch (err) {
+  console.log('Failed to read logo file, using fallback URL.');
+}
 
 /**
  * Send a custom email via Resend
@@ -26,57 +44,74 @@ export async function sendEmail({ to, subject, html, text }) {
 }
 
 /**
- * Generate a beautiful HTML email template
+ * Generate a stunning luxury HTML email template
  */
 export function buildEmailTemplate({ title, preheader, body, footerText }) {
-  return `
-<!DOCTYPE html>
+  // If logo attachment fails, fallback to a hosted placeholder or text
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title}</title>
-  <style>
-    body { margin: 0; padding: 0; background-color: #f4f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .email-wrapper { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
-    .email-header { background: linear-gradient(135deg, #1e3a5f 0%, #0d1b2a 100%); padding: 32px 40px; text-align: center; }
-    .email-header h1 { color: #d4af37; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px; }
-    .email-header p { color: #a0b4c8; margin: 8px 0 0; font-size: 14px; }
-    .email-body { padding: 40px; color: #333; line-height: 1.7; font-size: 15px; }
-    .email-body h2 { color: #1e3a5f; margin-top: 0; font-size: 22px; }
-    .email-body p { margin: 12px 0; }
-    .email-body .highlight-box { background: #f8f9fc; border-left: 4px solid #d4af37; padding: 16px 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
-    .email-body .btn { display: inline-block; background: linear-gradient(135deg, #d4af37, #c49b2a); color: #fff; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600; margin: 16px 0; }
-    .email-footer { background: #f4f7fa; padding: 24px 40px; text-align: center; color: #8899a6; font-size: 12px; border-top: 1px solid #e8ecf0; }
-    .email-footer a { color: #1e3a5f; text-decoration: none; }
-    .divider { height: 1px; background: #e8ecf0; margin: 24px 0; }
-    @media (max-width: 600px) {
-      .email-body { padding: 24px; }
-      .email-header { padding: 24px; }
-    }
-  </style>
 </head>
-<body>
-  <div style="padding: 20px;">
-    ${preheader ? `<div style="display:none;font-size:1px;color:#f4f7fa;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">${preheader}</div>` : ''}
-    <div class="email-wrapper">
-      <div class="email-header">
-        <h1>🏨 ${HOTEL_NAME}</h1>
-        <p>Authentic Hospitality, Timeless Luxury</p>
-      </div>
-      <div class="email-body">
-        ${body}
-      </div>
-      <div class="email-footer">
-        <p>${footerText || `© ${new Date().getFullYear()} ${HOTEL_NAME}. All rights reserved.`}</p>
-        <p>Main Boulevard, Gulberg III, Lahore, Pakistan</p>
-        <p><a href="tel:+9242111222333">+92 (42) 111-222-333</a> | <a href="mailto:info@grandazure.pk">info@grandazure.pk</a></p>
-      </div>
-    </div>
-  </div>
+<body style="margin:0;padding:0;background-color:#0A0A0A;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
+  ${preheader ? `<div style="display:none;font-size:1px;color:#0A0A0A;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">${preheader}</div>` : ''}
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0A0A0A;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;border-radius:16px;overflow:hidden;border:1px solid rgba(201,168,76,0.25);box-shadow:0 0 80px rgba(201,168,76,0.06);">
+
+        <!-- HEADER -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#0F0F0F 0%,#1A1400 50%,#0F0F0F 100%);padding:40px 40px 32px;text-align:center;border-bottom:1px solid rgba(201,168,76,0.2);">
+            <img src="${logoSrc}" alt="${HOTEL_NAME}" width="160" style="max-width:160px;height:auto;display:inline-block;margin-bottom:16px;" />
+            <div style="width:48px;height:1px;background:linear-gradient(90deg,transparent,#C9A84C,transparent);margin:0 auto 16px;"></div>
+            <p style="color:rgba(201,168,76,0.7);font-size:11px;letter-spacing:4px;text-transform:uppercase;margin:0;font-family:'Segoe UI',sans-serif;">Premium Hospitality · Pakistan</p>
+          </td>
+        </tr>
+
+        <!-- TITLE BAR -->
+        <tr>
+          <td style="background:#111111;padding:20px 40px;border-bottom:1px solid rgba(201,168,76,0.1);">
+            <h1 style="color:#F8F4EF;margin:0;font-size:20px;font-weight:300;letter-spacing:0.5px;">${title}</h1>
+          </td>
+        </tr>
+
+        <!-- BODY -->
+        <tr>
+          <td style="background:#111111;padding:32px 40px;color:#F8F4EF;font-size:15px;line-height:1.75;">
+            ${body}
+          </td>
+        </tr>
+
+        <!-- DIVIDER -->
+        <tr>
+          <td style="background:#111111;padding:0 40px;">
+            <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.3),transparent);"></div>
+          </td>
+        </tr>
+
+        <!-- FOOTER -->
+        <tr>
+          <td style="background:#0D0D0D;padding:28px 40px;text-align:center;border-top:1px solid rgba(201,168,76,0.1);">
+            <p style="color:rgba(248,244,239,0.6);font-size:13px;margin:0 0 6px;">${footerText || `© ${new Date().getFullYear()} ${HOTEL_NAME}. All rights reserved.`}</p>
+            <p style="color:rgba(248,244,239,0.35);font-size:12px;margin:0 0 4px;">Main Boulevard, Gulberg III, Lahore, Pakistan</p>
+            <p style="margin:8px 0 0;">
+              <a href="tel:+9242111222333" style="color:#C9A84C;text-decoration:none;font-size:12px;">+92 (42) 111-222-333</a>
+              <span style="color:rgba(201,168,76,0.3);margin:0 8px;">|</span>
+              <a href="mailto:info@luxurystay.pk" style="color:#C9A84C;text-decoration:none;font-size:12px;">info@luxurystay.pk</a>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
 </body>
 </html>`;
 }
+
+
 
 /**
  * Send an invoice email

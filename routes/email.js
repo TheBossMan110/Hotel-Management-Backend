@@ -13,14 +13,21 @@ router.post('/send', authenticate, async (req, res) => {
       return res.status(400).json({ success: false, message: 'To, subject, and message are required.' });
     }
 
-    // Build beautiful HTML email
-    const body = `
-      <h2>${subject}</h2>
-      <p>From: <strong>${req.user.firstName} ${req.user.lastName}</strong> (${req.user.email})</p>
-      <div class="divider"></div>
-      ${message.split('\n').map(line => `<p>${line}</p>`).join('')}
-      <div class="divider"></div>
-      <p style="color: #8899a6; font-size: 13px;">This email was sent via Grand Azure Pakistan Hotel Management System.</p>
+    // Detect if message is pre-built HTML (from contact form) or plain text (from admin composer)
+    const isHtml = message.trim().startsWith('<');
+    const body = isHtml
+      ? message  // contact form sends pre-built HTML body
+      : `
+      <p style="color:rgba(248,244,239,0.6);font-size:13px;margin:0 0 20px;">
+        Message from <strong style="color:#C9A84C;">${req.user.firstName} ${req.user.lastName}</strong>
+        &nbsp;·&nbsp; <a href="mailto:${req.user.email}" style="color:#C9A84C;text-decoration:none;">${req.user.email}</a>
+      </p>
+      <div style="border-left:3px solid #C9A84C;padding:16px 20px;background:rgba(201,168,76,0.05);border-radius:0 8px 8px 0;margin-bottom:24px;">
+        ${message.split('\n').map(line => `<p style="margin:6px 0;color:#F8F4EF;font-size:15px;">${line || '&nbsp;'}</p>`).join('')}
+      </div>
+      <p style="color:rgba(248,244,239,0.35);font-size:12px;margin:0;">
+        Sent via LuxuryStay Hospitality admin panel &nbsp;·&nbsp; ${new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' })} PKT
+      </p>
     `;
 
     const html = buildEmailTemplate({
