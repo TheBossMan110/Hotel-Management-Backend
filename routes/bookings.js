@@ -136,6 +136,11 @@ router.post('/', authenticate, async (req, res) => {
       return res.status(400).json({ message: 'Check-in date cannot be in the past.' });
     }
 
+    // Validate roomId format
+    if (!roomId || !roomId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: 'Invalid room ID format.' });
+    }
+
     // Get room and check availability
     const room = await Room.findById(roomId);
     if (!room) {
