@@ -1,5 +1,6 @@
 import express from 'express';
 import User from '../models/User.js';
+import GuestProfile from '../models/GuestProfile.js';
 import { 
   authenticate, 
   generateTokens, 
@@ -10,15 +11,32 @@ import {
 
 const router = express.Router();
 
+// ── Strong password validation ──
+function validatePasswordStrength(password) {
+  const errors = [];
+  if (!password || password.length < 8) errors.push('at least 8 characters');
+  if (!/[A-Z]/.test(password)) errors.push('at least 1 uppercase letter');
+  if (!/[a-z]/.test(password)) errors.push('at least 1 lowercase letter');
+  if (!/[0-9]/.test(password)) errors.push('at least 1 number');
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) errors.push('at least 1 special character (!@#$%^&* etc.)');
+  return errors;
+}
+
 // Register
 router.post('/register', async (req, res) => {
   try {
     const { email, password, firstName, lastName, phone } = req.body;
 
+    // Strong password validation
+    const pwErrors = validatePasswordStrength(password);
+    if (pwErrors.length > 0) {
+      return res.status(400).json({ message: 'Password must contain: ' + pwErrors.join(', ') + '.' });
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      return res.status(400).json({ message: 'Email already registered.' });
+      return res.status(400).json({ message: 'An account with this email already exists. Please log in instead.' });
     }
 
     // Create user
@@ -32,6 +50,25 @@ router.post('/register', async (req, res) => {
     });
 
     await user.save();
+
+    // Create GuestProfile for new guest users
+    try {
+      await GuestProfile.create({
+        userId: user._id,
+        nationality: '',
+        idType: 'passport',
+        loyaltyPoints: 0,
+        membershipTier: 'bronze',
+        preferences: {},
+        totalVisits: 0,
+        totalSpent: 0,
+        vipStatus: false,
+        blacklisted: false,
+        visitHistory: []
+      });
+    } catch (gpErr) {
+      console.error('GuestProfile creation error (non-fatal):', gpErr.message);
+    }
 
     // Generate tokens
     const { accessToken, refreshToken } = generateTokens(user._id);
@@ -209,8 +246,9 @@ router.put('/password', authenticate, async (req, res) => {
       return res.status(400).json({ message: 'Current and new password required.' });
     }
 
-    if (newPassword.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters.' });
+    const pwErrors = validatePasswordStrength(newPassword);
+    if (pwErrors.length > 0) {
+      return res.status(400).json({ message: 'Password must contain: ' + pwErrors.join(', ') + '.' });
     }
 
     const user = await User.findById(req.userId).select('+password');

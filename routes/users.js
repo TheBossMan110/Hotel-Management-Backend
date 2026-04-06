@@ -1,5 +1,6 @@
 import express from 'express';
 import User from '../models/User.js';
+import Booking from '../models/Booking.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -166,7 +167,10 @@ router.get('/guests', authenticate, authorize('admin', 'staff'), async (req, res
         },
         {
           $addFields: {
-            totalBookings: { $size: '$bookings' }
+            totalBookings: { $size: '$bookings' },
+            totalSpent: {
+              $sum: '$bookings.pricing.total'
+            }
           }
         },
         { $project: { bookings: 0, password: 0, refreshToken: 0 } }

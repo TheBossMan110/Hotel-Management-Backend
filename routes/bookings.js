@@ -73,7 +73,7 @@ router.get('/my-bookings', authenticate, async (req, res) => {
 
     const [bookings, total] = await Promise.all([
       Booking.find(query)
-        .populate('room', 'roomNumber name type price images')
+        .populate('room', 'roomNumber name type price images floor')
         .sort('-createdAt')
         .skip(skip)
         .limit(Number(limit)),
@@ -198,12 +198,31 @@ router.post('/', authenticate, async (req, res) => {
     else user.membershipTier = 'bronze';
     await user.save();
 
-    // Also update GuestProfile if exists
-    const guestProfile = await GuestProfile.findOne({ userId: req.userId });
-    if (guestProfile) {
-      guestProfile.loyaltyPoints = user.loyaltyPoints;
-      guestProfile.updateMembershipTier();
-      await guestProfile.save();
+    // Update (or create) GuestProfile with booking stats
+    try {
+      await GuestProfile.findOneAndUpdate(
+        { userId: req.userId },
+        {
+          $inc: {
+            totalVisits: 1,
+            totalSpent: total,
+            loyaltyPoints: Math.floor(total / 100)
+          },
+          $push: {
+            visitHistory: {
+              bookingId: booking._id,
+              checkIn: checkInDate,
+              checkOut: checkOutDate,
+              roomType: room.type,
+              roomNumber: room.roomNumber,
+              totalSpent: total
+            }
+          }
+        },
+        { upsert: true, new: true }
+      );
+    } catch (gpErr) {
+      console.error('GuestProfile update error (non-fatal):', gpErr.message);
     }
 
     // Notify admins about new booking

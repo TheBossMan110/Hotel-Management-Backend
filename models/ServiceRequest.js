@@ -3,8 +3,7 @@ import mongoose from 'mongoose';
 const serviceRequestSchema = new mongoose.Schema({
   requestNumber: {
     type: String,
-    unique: true,
-    required: true
+    unique: true
   },
   // Foreign keys
   guest: {

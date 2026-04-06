@@ -3,8 +3,7 @@ import mongoose from 'mongoose';
 const maintenanceRequestSchema = new mongoose.Schema({
   ticketNumber: {
     type: String,
-    unique: true,
-    required: true
+    unique: true
   },
   // Foreign keys
   room: {
@@ -108,7 +107,7 @@ maintenanceRequestSchema.index({ category: 1 });
 maintenanceRequestSchema.index({ createdAt: -1 });
 
 // Auto-generate ticket number before first save
-maintenanceRequestSchema.pre('save', async function(next) {
+maintenanceRequestSchema.pre('validate', async function(next) {
   if (!this.ticketNumber) {
     const date = new Date();
     const year = date.getFullYear();

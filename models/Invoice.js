@@ -3,8 +3,7 @@ import mongoose from 'mongoose';
 const invoiceSchema = new mongoose.Schema({
   invoiceNumber: {
     type: String,
-    unique: true,
-    required: true
+    unique: true
   },
   booking: {
     type: mongoose.Schema.Types.ObjectId,
@@ -67,7 +66,7 @@ invoiceSchema.index({ 'payment.status': 1 });
 invoiceSchema.index({ issuedDate: -1 });
 
 // Generate invoice number
-invoiceSchema.pre('save', async function(next) {
+invoiceSchema.pre('validate', async function(next) {
   if (!this.invoiceNumber) {
     const date = new Date();
     const year = date.getFullYear();

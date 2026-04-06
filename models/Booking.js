@@ -3,8 +3,7 @@ import mongoose from 'mongoose';
 const bookingSchema = new mongoose.Schema({
   bookingNumber: {
     type: String,
-    unique: true,
-    required: true
+    unique: true
   },
   guest: {
     type: mongoose.Schema.Types.ObjectId,
@@ -106,7 +105,7 @@ bookingSchema.index({ checkIn: 1, checkOut: 1 });
 bookingSchema.index({ createdAt: -1 });
 
 // Generate booking number before saving
-bookingSchema.pre('save', async function(next) {
+bookingSchema.pre('validate', async function(next) {
   if (!this.bookingNumber) {
     const date = new Date();
     const year = date.getFullYear().toString().slice(-2);

@@ -151,7 +151,11 @@ router.get('/my-invoices', authenticate, async (req, res) => {
 
     const [invoices, total] = await Promise.all([
       Invoice.find(query)
-        .populate('booking', 'bookingNumber checkIn checkOut')
+        .populate({
+          path: 'booking',
+          select: 'bookingNumber checkIn checkOut pricing room',
+          populate: { path: 'room', select: 'roomNumber name type' }
+        })
         .sort('-issuedDate')
         .skip(skip)
         .limit(Number(limit)),
